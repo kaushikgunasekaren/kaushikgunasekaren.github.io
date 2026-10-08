@@ -133,7 +133,7 @@ This is a public repository and website. The resume PDF is public and unchanged 
 | AMASS | `blimp` | Thrust/wind sliders, animated checkpoint flight, reset | Simplified motion, not the real controller |
 | MIT Auto-ID | `sensors` | Choose drop position, deploy sensor, reset | Synthetic readings, not lab data |
 | Motorsports | `cooling` | Load/airflow sliders change example temperature and gauge | Arbitrary teaching formula, not telemetry |
-| LANL hackathon | `timeline` | Scrub four story stages or use next/previous | Milestone timing and photos pending; only resume facts are asserted |
+| LANL hackathon | `timeline` | Scrub four story stages or use next/previous | High-level story from presentation/resume; no exact milestone timing or measured results |
 | RAS 101 | `arm` | Add commands, validate/run a pick-and-place sequence, clear | Schematic arm, not a Dobot model or hardware interface |
 | ARMS | `twin` | View-angle control, show/hide conceptual joint markers, reset | 2D schematic stand-in, not an actual Unitree model or running simulation |
 
@@ -150,3 +150,9 @@ To add another module, add a key/title/note/UI definition in `DEMOS`, add its be
 ### Demo testing
 
 At desktop and mobile sizes, exercise every range input and button, check status changes and resets, run valid and invalid arm sequences, let animations finish, and verify captions remain visible. Test navigation and reloads after adding each module. Keep simulations off the home page so its pathfinding demo stays light.
+
+### LANL page content update
+
+The LANL page now uses original high-level text informed by the owner-provided project presentation and resume. The role is **Programmer and Team Lead**, as the presentation states. `sections` contains the case study; `story` contains four `{title, body}` objects read by the interactive story module. The four stages are thematic, not claimed timed milestones or a fabricated test sequence.
+
+The presentation itself is not a site asset. Do not upload, embed, link, or reuse its slides, photos, teammate identities, or CAD. Detailed client-specific dimensions, mechanism sequences, material specifications, and operating details remain omitted pending explicit public-clearance confirmation. No measured performance or radioactive-material validation is asserted.
