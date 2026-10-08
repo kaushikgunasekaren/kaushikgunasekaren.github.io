@@ -1,1 +1,186 @@
-"Hello World" 
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaushik Gunasekaren - Robotics & Autonomous Systems</title>
+<meta name="description" content="Robotics and Autonomous Systems student at ASU. Research, hackathons, and robots.">
+<style>
+:root{--bg:#0b0f14;--panel:#121923;--line:#1f2a38;--fg:#e6edf3;--dim:#8b9bb0;--acc:#ffb000;--acc2:#38d6a8}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+a{color:var(--acc2)}
+header{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;z-index:5;background:linear-gradient(var(--bg),transparent);font-size:13px}
+header b{color:var(--acc)}
+nav a{margin-left:16px;color:var(--dim);text-decoration:none}
+nav a:hover{color:var(--fg)}
+#stage{position:relative;height:100vh;min-height:560px}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+.hero{position:absolute;left:5vw;bottom:9vh;pointer-events:none;max-width:min(560px,90vw);text-shadow:0 0 12px var(--bg),0 0 24px var(--bg)}
+.hero h1{font-size:clamp(30px,6vw,60px);margin:0 0 8px;letter-spacing:-1px}
+.hero p{color:var(--dim);margin:0 0 6px;line-height:1.5}
+.hero .hint{color:var(--acc);font-size:12px}
+#panel{position:absolute;right:4vw;top:84px;width:min(380px,90vw);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;display:none;z-index:4}
+#panel.on{display:block}
+#panel h3{margin:0 0 4px;color:var(--acc)}
+#panel .when{color:var(--dim);font-size:12px;margin-bottom:10px}
+#panel li{margin:6px 0;line-height:1.45;font-size:14px}
+#panel ul{padding-left:18px;margin:0}
+#panel .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+#panel .tags span{border:1px solid var(--line);color:var(--dim);padding:2px 8px;border-radius:99px;font-size:11px}
+#panel button{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--dim);font-size:18px;cursor:pointer}
+.tools{position:absolute;left:5vw;top:70px;display:flex;gap:8px;z-index:4;flex-wrap:wrap}
+.tools button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer}
+.tools button:hover{border-color:var(--acc)}
+section{max-width:900px;margin:0 auto;padding:80px 22px}
+section h2{color:var(--acc);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 24px}
+.about p{font-size:17px;line-height:1.7;color:#c9d4e2}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h4{margin:0 0 8px;color:var(--acc2);font-size:13px}
+.card p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}
+.links a{display:inline-block;margin:0 18px 10px 0;font-size:16px}
+footer{color:var(--dim);font-size:12px;text-align:center;padding:30px}
+@media(max-width:640px){nav{display:none}.tools{top:56px}}
+
+.rs{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.btn{background:var(--acc);color:#0b0f14;text-decoration:none;padding:9px 16px;border-radius:6px;font-weight:700;font-size:14px}
+.btn:hover{filter:brightness(1.1)}
+#q{flex:1;min-width:200px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:9px 12px;font:inherit;font-size:14px}
+#q:focus{outline:none;border-color:var(--acc)}
+#rr .hit{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:14px;line-height:1.5;color:#c9d4e2}
+#rr .hit small{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+#rr mark{background:var(--acc);color:#0b0f14;border-radius:2px;padding:0 2px}
+#rc{color:var(--dim);font-size:12px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header><b>kaushik@asu:~$</b><nav><a href="#resume">resume</a><a href="#about">about</a><a href="#skills">skills</a><a href="#contact">contact</a></nav></header>
+
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div class="tools">
+    <button id="reset">reset map</button>
+    <button id="rand">random walls</button>
+    <button id="algo">algorithm: A*</button>
+  </div>
+  <div class="hero">
+    <h1>Kaushik Gunasekaren</h1>
+    <p>Robotics &amp; Autonomous Systems at ASU. I build robots, from blimps to digital twins.</p>
+    <p class="hint">Draw walls by dragging. Click a glowing node and the robot drives there.</p>
+  </div>
+  <div id="panel"><button id="x" aria-label="close">&times;</button><h3 id="pt"></h3><div class="when" id="pw"></div><ul id="pl"></ul><div class="tags" id="pg"></div></div>
+</div>
+
+<section id="resume">
+  <h2>Resume</h2>
+  <div class="rs"><a class="btn" href="3-resume.pdf" target="_blank" rel="noopener">Open resume (PDF)</a><input id="q" type="search" placeholder="Search my resume: try ROS2, MuJoCo, blimp..." autocomplete="off"></div>
+  <div id="rc"></div><div id="rr"></div>
+</section>
+
+<section id="about" class="about">
+  <h2>About</h2>
+  <p>I'm a Robotics and Autonomous Systems undergrad at Arizona State University (Polytechnic, expected May 2028). I like taking a project from a rough idea to something that actually moves: CAD, electronics, code, and testing. I'm looking for a Summer 2027 engineering internship.</p>
+</section>
+
+<section id="skills">
+  <h2>Skills</h2>
+  <div class="cols">
+    <div class="card"><h4>CAD / Design</h4><p>Fusion 360, SolidWorks, Onshape, 3D printing</p></div>
+    <div class="card"><h4>Code &amp; Systems</h4><p>Python, C++, MATLAB, ROS2, MuJoCo, Isaac Sim, Linux (Ubuntu, Arch)</p></div>
+    <div class="card"><h4>Embedded</h4><p>Raspberry Pi, ESP32, Arduino</p></div>
+    <div class="card"><h4>Professional</h4><p>Technical documentation, hardware integration, stakeholder communication</p></div>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="links">
+    <a href="mailto:kaushik.gunasekaren@gmail.com">kaushik.gunasekaren@gmail.com</a>
+    <a href="mailto:kgunase7@asu.edu">kgunase7@asu.edu</a>
+    <a href="https://www.linkedin.com/in/kaushik-gunasekaren" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/kaushikgunasekaren" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</section>
+<footer>Built with a robot that finds its own way. Press <b>r</b> to reset.</footer>
+
+<script>
+const PROJECTS=[
+ {id:'mit',short:'MIT Auto-ID',name:'MIT Auto-ID Lab',when:'Research Assistant, Jul 2026 - now',tags:['sensors','drones','field research'],pts:['Design and prototype low-cost, projectile-deployed environmental sensors for temperature, moisture, and canopy microclimate in remote forests.','Contribute to a drone-based deployment platform and low-impact attachment mechanism for hard-to-reach terrain.']},
+ {id:'lanl',short:'LANL Hackathon',name:'LANL x ASU Devils Invent',when:'1st Place, ASU, Mar 2026',tags:['hackathon','prototyping','automation'],pts:['Built a working prototype in 48 hours and presented to Los Alamos National Laboratory judges.','Engineered an automated system to safely scrape and collect fired Americium Dioxide from a crucible, cutting operator exposure and the need for skilled manual handling.']},
+ {id:'amass',short:'AMASS Blimp',name:'AMASS Lab Blimp',when:'Research Assistant, ASU, 2025',tags:['Raspberry Pi','Python','controls'],pts:['Designed and built an autonomous blimp airframe for the "Defend the Republic" national competition.','Programmed a Raspberry Pi in Python for propulsion control.']},
+ {id:'arms',name:'ARMS Club',when:'Vice President, Aug 2026 - now',tags:['MuJoCo','Isaac Sim','leadership'],pts:['Help lead a student-run engineering consultancy for corporate clients; contract revenue funds member-led R&D.','Created digital twins of the Unitree Go2 and G1 in MuJoCo and Isaac Sim.']},
+ {id:'wh',short:'Warehouse Bot',name:'Warehouse Robot Navigation',when:'ASU RAS course project',tags:['Python','Dijkstra','pygame'],pts:['Team project with an interactive warehouse map builder and pathfinder using Dijkstra, written in Python and pygame. The grid above is a nod to it.'],link:'https://github.com/kaushikgunasekaren/Autonomous-Warehouse-Robot-Navigation'},
+ {id:'sdm',short:'Motorsports',name:'Sun Devil Motorsports',when:'Team Member, Sep 2024 - now',tags:['Formula SAE','thermal','manufacturing'],pts:['Designed the cooling system for a Formula SAE car and manufactured the body harness with Rapid Harness.']},
+ {id:'ta',short:'RAS 101 TA',name:'RAS 101 Learning Assistant',when:'ASU, Aug 2026 - now',tags:['Dobot','teaching'],pts:['Guide students through Dobot programming, manipulation, and intro robotics labs; troubleshoot hardware and software.']}
+];
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H,CS,cols,rows,grid,nodes=[],robot,path=[],target=null,algo='astar',dpr=Math.min(devicePixelRatio||1,2),trail=[];
+function init(keep){
+  W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  CS=W<700?22:30;cols=Math.floor(W/CS);rows=Math.floor(H/CS);
+  grid=Array.from({length:rows},()=>Array(cols).fill(0));
+  const L=W<700?[[.25,.17],[.72,.17],[.5,.27],[.25,.37],[.72,.37],[.25,.5],[.72,.5]]:[[.12,.2],[.82,.2],[.3,.4],[.55,.3],[.72,.52],[.9,.42],[.48,.55]];
+  nodes=PROJECTS.map((p,i)=>({...p,x:Math.round(cols*L[i][0]),y:Math.round(rows*L[i][1])}));
+  robot={x:1,y:rows-2,px:CS*1.5,py:CS*(rows-1.5)};path=[];trail=[];
+}
+function nb(x,y){return[[1,0],[-1,0],[0,1],[0,-1]].map(d=>[x+d[0],y+d[1]]).filter(([a,b])=>a>=0&&b>=0&&a<cols&&b<rows&&!grid[b][a])}
+function find(sx,sy,tx,ty){
+  const key=(x,y)=>y*cols+x,h=(x,y)=>algo==='astar'?Math.abs(x-tx)+Math.abs(y-ty):0;
+  const g=new Map([[key(sx,sy),0]]),from=new Map(),open=[[h(sx,sy),sx,sy]],seen=new Set();
+  while(open.length){open.sort((a,b)=>a[0]-b[0]);const[,x,y]=open.shift();const k=key(x,y);if(seen.has(k))continue;seen.add(k);
+    if(x===tx&&y===ty){const p=[];let c=k;while(c!==key(sx,sy)){p.unshift([c%cols,Math.floor(c/cols)]);c=from.get(c)}return p}
+    for(const[a,b]of nb(x,y)){const nk=key(a,b),ng=g.get(k)+1;if(!g.has(nk)||ng<g.get(nk)){g.set(nk,ng);from.set(nk,k);open.push([ng+h(a,b),a,b])}}}
+  return null}
+function go(n){const p=find(robot.x,robot.y,n.x,n.y);if(!p){flash();return}path=p;target=n}
+let flashT=0;function flash(){flashT=20}
+function arrive(n){const P=document.getElementById('panel');pt.textContent=n.name;pw.textContent=n.when;
+  pl.innerHTML=n.pts.map(t=>'<li>'+t+'</li>').join('')+(n.link?'<li><a href="'+n.link+'" target="_blank" rel="noopener">View on GitHub</a></li>':'');
+  pg.innerHTML=n.tags.map(t=>'<span>'+t+'</span>').join('');P.classList.add('on')}
+const pt=document.getElementById('pt'),pw=document.getElementById('pw'),pl=document.getElementById('pl'),pg=document.getElementById('pg');
+document.getElementById('x').onclick=()=>document.getElementById('panel').classList.remove('on');
+let drawing=false,mode=1;
+function cell(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return[Math.floor((t.clientX-r.left)/CS),Math.floor((t.clientY-r.top)/CS)]}
+function paint(e){const[x,y]=cell(e);if(x<0||y<0||x>=cols||y>=rows)return;if(nodes.some(n=>n.x===x&&n.y===y)||(x===robot.x&&y===robot.y))return;
+  if(grid[y][x]!==mode){grid[y][x]=mode;if(target){const p=find(robot.x,robot.y,target.x,target.y);if(p)path=p}}}
+cv.addEventListener('pointerdown',e=>{const[x,y]=cell(e);const n=nodes.find(n=>Math.abs(n.x-x)<=1&&Math.abs(n.y-y)<=1);
+  if(n){go(n);return}drawing=true;mode=grid[y]&&grid[y][x]?0:1;paint(e);cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(drawing)paint(e)});
+cv.addEventListener('pointerup',()=>drawing=false);
+document.getElementById('reset').onclick=()=>{grid.forEach(r=>r.fill(0));path=[];target=null};
+document.getElementById('rand').onclick=()=>{for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){grid[y][x]=Math.random()<.2&&!nodes.some(n=>Math.abs(n.x-x)<2&&Math.abs(n.y-y)<2)&&!(x<2&&y>rows-3)?1:0}path=[];target=null};
+document.getElementById('algo').onclick=e=>{algo=algo==='astar'?'dijkstra':'astar';e.target.textContent='algorithm: '+(algo==='astar'?'A*':'Dijkstra')};
+addEventListener('keydown',e=>{if(e.key==='r')document.getElementById('reset').click()});
+addEventListener('resize',()=>init());
+let last=0;
+function frame(t){requestAnimationFrame(frame);const dt=Math.min(t-last,50);last=t;
+  if(path.length){const[nx,ny]=path[0];const tx=(nx+.5)*CS,ty=(ny+.5)*CS;const dx=tx-robot.px,dy=ty-robot.py,d=Math.hypot(dx,dy),sp=dt*.28;
+    if(d<=sp){robot.px=tx;robot.py=ty;robot.x=nx;robot.y=ny;path.shift();trail.push([nx,ny]);if(trail.length>40)trail.shift();if(!path.length&&target){arrive(target);target=null}}
+    else{robot.px+=dx/d*sp;robot.py+=dy/d*sp}}
+  draw(t)}
+function draw(t){ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#162030';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=cols;x++){ctx.moveTo(x*CS,0);ctx.lineTo(x*CS,rows*CS)}for(let y=0;y<=rows;y++){ctx.moveTo(0,y*CS);ctx.lineTo(cols*CS,y*CS)}ctx.stroke();
+  ctx.fillStyle='#2a3a52';for(let y=0;y<rows;y++)for(let x=0;x<cols;x++)if(grid[y][x])ctx.fillRect(x*CS+1,y*CS+1,CS-2,CS-2);
+  ctx.fillStyle='rgba(56,214,168,.15)';trail.forEach(([x,y])=>ctx.fillRect(x*CS+2,y*CS+2,CS-4,CS-4));
+  ctx.fillStyle='rgba(255,176,0,.35)';path.forEach(([x,y])=>ctx.fillRect(x*CS+CS*.33,y*CS+CS*.33,CS*.34,CS*.34));
+  ctx.font='11px ui-monospace,monospace';ctx.textAlign='center';
+  nodes.forEach(n=>{const cx=(n.x+.5)*CS,cy=(n.y+.5)*CS,pulse=4+Math.sin(t/400+n.x)*2;
+    ctx.fillStyle='rgba(255,176,0,.18)';ctx.beginPath();ctx.arc(cx,cy,CS*.5+pulse,0,7);ctx.fill();
+    ctx.fillStyle='#ffb000';ctx.beginPath();ctx.arc(cx,cy,CS*.28,0,7);ctx.fill();
+    const lb=W<700&&n.short?n.short:n.name;const w=ctx.measureText(lb).width+10;ctx.fillStyle='rgba(11,15,20,.85)';ctx.fillRect(cx-w/2,cy+CS*.75,w,16);ctx.fillStyle='#e6edf3';ctx.fillText(lb,cx,cy+CS*.75+12)});
+  const r=CS*.34;ctx.save();ctx.translate(robot.px,robot.py);ctx.fillStyle=flashT>0?'#ff5f5f':'#38d6a8';ctx.fillRect(-r,-r,r*2,r*2);ctx.fillStyle='#0b0f14';ctx.fillRect(-r*.6,-r*.4,r*.4,r*.4);ctx.fillRect(r*.2,-r*.4,r*.4,r*.4);ctx.restore();
+  if(flashT>0)flashT--}
+
+const RES=[["", "kaushik.gunasekaren@gmail.com • linkedin.com/in/kaushik-gunasekaren"], ["Personal Summary", "Driven undergraduate at Arizona State University pursuing a Bachelor’s degree in Robotics and Autonomous Systems, with hands-on experience in robotics, automation, engineering design, and research. Experienced in designing robotic systems, developing prototypes, troubleshooting hardware and software, and taking projects from concept through implementation. Seeking a Summer 2027 engineering internship to contribute to challenging projects, gain industry experience, and grow as an engineer."], ["Education", "Arizona State University - Polytechnic Campus, Mesa, AZ"], ["Education", "B.S., Robotics and Autonomous Systems | Expected May 2028 | GPA: 3.8/4.0"], ["Technical Skills", "CAD/Design: Fusion 360, SolidWorks, Onshape, 3D printing software"], ["Technical Skills", "Programming & Systems: Python, MATLAB, Embedded Systems (Raspberry Pi, ESP32, Arduino), Linux (Ubuntu & Arch), ROS2, C++, MuJoCo, Isaac Sim"], ["Technical Skills", "Professional: Technical documentation, hardware integration, client/stakeholder communication, cross-functional collaboration"], ["Project & Leadership Experience", "MIT Auto-ID Lab — Research Assistant | Jul 2026 – Present"], ["Project & Leadership Experience", "Design and prototype low-cost, projectile-deployed environmental sensors for measuring temperature, moisture, and canopy microclimate conditions in remote forests."], ["Project & Leadership Experience", "Contribute to the development of a drone-based deployment platform and low-impact attachment mechanism for sensor placement in hard-to-reach terrain."], ["Project & Leadership Experience", "LANL x ASU Devils Invent Hackathon — 1st Place, ASU | Mar 2026"], ["Project & Leadership Experience", "Designed and built a functional prototype within 48 hours, presenting the final system and technical results to Los Alamos National Laboratory judges."], ["Project & Leadership Experience", "Engineered an automated system to safely scrape and collect fired Americium Dioxide from a crucible, reducing operator exposure and eliminating the need for skilled manual handling."], ["Project & Leadership Experience", "AMASS Lab — Research Assistant, ASU | Jan 2025 – Dec 2025"], ["Project & Leadership Experience", "Designed and built an autonomous blimp airframe for the “Defend the Republic” national competition, integrating structural, propulsion, and control systems."], ["Project & Leadership Experience", "Programmed a Raspberry Pi in Python to control propulsion, applying embedded systems and control concepts to a functional autonomous prototype."], ["Project & Leadership Experience", "Sun Devil Motorsports — Team Member, ASU | Sep 2024 – Present"], ["Project & Leadership Experience", "Designed a cooling system for a Formula SAE vehicle and manufactured the vehicle’s body harness using Rapid Harness."], ["Project & Leadership Experience", "ARMS Club — Vice President, ASU | Aug 2026 – Present"], ["Project & Leadership Experience", "Advanced Robotics and Manufacturing Systems"], ["Project & Leadership Experience", "Help lead a student-run engineering consultancy delivering solutions for corporate clients."], ["Project & Leadership Experience", "Oversee project execution and reinvest contract revenue into member-led R&D projects"], ["Project & Leadership Experience", "Created Digital Twins of Unitree Go2 and G1 using MuJoCo and Isaac Sim"], ["Work Experience", "Undergraduate Learning Assistant, RAS 101 — ASU | Aug 2026 – Present"], ["Work Experience", "Guide students through Dobot programming, manipulation, and introductory robotics labs."], ["Work Experience", "Troubleshoot hardware and software issues while reinforcing robotics and mechatronics fundamentals."]];
+const rq=document.getElementById('q'),rr=document.getElementById('rr'),rc=document.getElementById('rc');
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function search(){const v=rq.value.trim().toLowerCase();if(!v){rc.textContent='Type a keyword to search the resume.';rr.innerHTML='';return}
+  const terms=v.split(/\s+/);const hits=RES.filter(([s,l])=>terms.every(t=>(s+' '+l).toLowerCase().includes(t)));
+  rc.textContent=hits.length+(hits.length===1?' match':' matches');
+  const re=new RegExp('('+terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
+  rr.innerHTML=hits.map(([s,l])=>'<div class="hit"><small>'+esc(s)+'</small>'+esc(l).replace(re,'<mark>$1</mark>')+'</div>').join('')}
+rq.addEventListener('input',search);search();
+init();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
