@@ -1,4 +1,9 @@
 <!doctype html>
+<!--
+  Portfolio site for Kaushik Gunasekaren: a single self-contained page (HTML + CSS + JS, no build step, no dependencies).
+  Sections: interactive robot-pathfinding hero, searchable resume, about, skills, contact.
+  Deployed by GitHub Pages from the main branch of kaushikgunasekaren.github.io. See README.md for details.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -6,20 +11,27 @@
 <title>Kaushik Gunasekaren - Robotics & Autonomous Systems</title>
 <meta name="description" content="Robotics and Autonomous Systems student at ASU. Research, hackathons, and robots.">
 <style>
+/* Design tokens (colors). Change a value here and the whole page follows.
+   --bg page background, --panel cards/panels, --line borders, --fg main text, --dim muted text, --acc amber accent, --acc2 green accent. */
 :root{--bg:#0b0f14;--panel:#121923;--line:#1f2a38;--fg:#e6edf3;--dim:#8b9bb0;--acc:#ffb000;--acc2:#38d6a8}
+/* Global reset and base page styling (dark theme, monospace font stack). */
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 a{color:var(--acc2)}
+/* Fixed top bar: site label on the left, section links (nav) on the right. Nav is hidden on small screens (see media query below). */
 header{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;z-index:5;background:linear-gradient(var(--bg),transparent);font-size:13px}
 header b{color:var(--acc)}
 nav a{margin-left:16px;color:var(--dim);text-decoration:none}
 nav a:hover{color:var(--fg)}
+/* Hero stage: a full-viewport area holding the canvas (grid/robot), the hero text, the control buttons and the project panel. */
 #stage{position:relative;height:100vh;min-height:560px}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+/* Hero text overlay. pointer-events:none lets mouse/touch pass through to the canvas underneath. */
 .hero{position:absolute;left:5vw;bottom:9vh;pointer-events:none;max-width:min(560px,90vw);text-shadow:0 0 12px var(--bg),0 0 24px var(--bg)}
 .hero h1{font-size:clamp(30px,6vw,60px);margin:0 0 8px;letter-spacing:-1px}
 .hero p{color:var(--dim);margin:0 0 6px;line-height:1.5}
 .hero .hint{color:var(--acc);font-size:12px}
+/* Project detail panel. Hidden by default; the class 'on' (added in arrive()) shows it when the robot reaches a project node. */
 #panel{position:absolute;right:4vw;top:84px;width:min(380px,90vw);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;display:none;z-index:4}
 #panel.on{display:block}
 #panel h3{margin:0 0 4px;color:var(--acc)}
@@ -29,9 +41,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:cro
 #panel .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
 #panel .tags span{border:1px solid var(--line);color:var(--dim);padding:2px 8px;border-radius:99px;font-size:11px}
 #panel button{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--dim);font-size:18px;cursor:pointer}
+/* Control buttons over the canvas (reset map, random walls, algorithm toggle). */
 .tools{position:absolute;left:5vw;top:70px;display:flex;gap:8px;z-index:4;flex-wrap:wrap}
 .tools button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer}
 .tools button:hover{border-color:var(--acc)}
+/* Content sections below the hero: about, skills cards, contact links, footer. */
 section{max-width:900px;margin:0 auto;padding:80px 22px}
 section h2{color:var(--acc);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 24px}
 .about p{font-size:17px;line-height:1.7;color:#c9d4e2}
@@ -41,8 +55,10 @@ section h2{color:var(--acc);font-size:14px;letter-spacing:2px;text-transform:upp
 .card p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}
 .links a{display:inline-block;margin:0 18px 10px 0;font-size:16px}
 footer{color:var(--dim);font-size:12px;text-align:center;padding:30px}
+/* Small-screen tweaks: hide nav and move the control buttons up. */
 @media(max-width:640px){nav{display:none}.tools{top:56px}}
 
+/* Resume section: PDF button, search box, and search result cards. #rr holds results, #rc the match count. */
 .rs{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
 .btn{background:var(--acc);color:#0b0f14;text-decoration:none;padding:9px 16px;border-radius:6px;font-weight:700;font-size:14px}
 .btn:hover{filter:brightness(1.1)}
@@ -55,8 +71,13 @@ footer{color:var(--dim);font-size:12px;text-align:center;padding:30px}
 </style>
 </head>
 <body>
+<!-- Top bar. Anchor links jump to the section ids further down. -->
 <header><b>kaushik@asu:~$</b><nav><a href="#resume">resume</a><a href="#about">about</a><a href="#skills">skills</a><a href="#contact">contact</a></nav></header>
 
+<!--
+  Hero: interactive pathfinding demo. The canvas is drawn by the script at the bottom of the page.
+  Drag on the grid to draw or erase walls. Click a glowing node and the robot drives there.
+-->
 <div id="stage">
   <canvas id="c"></canvas>
   <div class="tools">
@@ -72,17 +93,20 @@ footer{color:var(--dim);font-size:12px;text-align:center;padding:30px}
   <div id="panel"><button id="x" aria-label="close">&times;</button><h3 id="pt"></h3><div class="when" id="pw"></div><ul id="pl"></ul><div class="tags" id="pg"></div></div>
 </div>
 
+<!-- Resume: button opens the PDF (3-resume.pdf in the repo root); the search box filters the RES array in the script, line by line. -->
 <section id="resume">
   <h2>Resume</h2>
   <div class="rs"><a class="btn" href="3-resume.pdf" target="_blank" rel="noopener">Open resume (PDF)</a><input id="q" type="search" placeholder="Search my resume: try ROS2, MuJoCo, blimp..." autocomplete="off"></div>
   <div id="rc"></div><div id="rr"></div>
 </section>
 
+<!-- About: short bio and what I am looking for. -->
 <section id="about" class="about">
   <h2>About</h2>
   <p>I'm a Robotics and Autonomous Systems undergrad at Arizona State University (Polytechnic, expected May 2028). I like taking a project from a rough idea to something that actually moves: CAD, electronics, code, and testing. I'm looking for a Summer 2027 engineering internship.</p>
 </section>
 
+<!-- Skills: one card per category. Copy a .card div to add another. -->
 <section id="skills">
   <h2>Skills</h2>
   <div class="cols">
@@ -93,6 +117,7 @@ footer{color:var(--dim);font-size:12px;text-align:center;padding:30px}
   </div>
 </section>
 
+<!-- Contact: email and profile links. External links use rel=noopener so the new tab cannot reach back into this page. -->
 <section id="contact">
   <h2>Contact</h2>
   <div class="links">
@@ -102,9 +127,14 @@ footer{color:var(--dim);font-size:12px;text-align:center;padding:30px}
     <a href="https://github.com/kaushikgunasekaren" target="_blank" rel="noopener">GitHub</a>
   </div>
 </section>
+<!-- Footer. The 'r' keyboard shortcut is wired up in the script (keydown handler). -->
 <footer>Built with a robot that finds its own way. Press <b>r</b> to reset.</footer>
 
+<!-- All page logic lives here. Rough order: project data, grid/robot state, pathfinding, input handlers, animation loop, drawing, resume search, startup. -->
 <script>
+// PROJECTS: data for each glowing node on the grid.
+// Fields: id (unique key), short (label used on narrow screens, optional), name (title), when (role and date), tags (chips), pts (bullet points, HTML allowed), link (optional 'View on GitHub' URL).
+// To add a project, add an entry here and add a matching [x, y] position to BOTH layout lists (L) inside init(); the lists need one position per project, in the same order.
 const PROJECTS=[
  {id:'mit',short:'MIT Auto-ID',name:'MIT Auto-ID Lab',when:'Research Assistant, Jul 2026 - now',tags:['sensors','drones','field research'],pts:['Design and prototype low-cost, projectile-deployed environmental sensors for temperature, moisture, and canopy microclimate in remote forests.','Contribute to a drone-based deployment platform and low-impact attachment mechanism for hard-to-reach terrain.']},
  {id:'lanl',short:'LANL Hackathon',name:'LANL x ASU Devils Invent',when:'1st Place, ASU, Mar 2026',tags:['hackathon','prototyping','automation'],pts:['Built a working prototype in 48 hours and presented to Los Alamos National Laboratory judges.','Engineered an automated system to safely scrape and collect fired Americium Dioxide from a crucible, cutting operator exposure and the need for skilled manual handling.']},
@@ -114,8 +144,15 @@ const PROJECTS=[
  {id:'sdm',short:'Motorsports',name:'Sun Devil Motorsports',when:'Team Member, Sep 2024 - now',tags:['Formula SAE','thermal','manufacturing'],pts:['Designed the cooling system for a Formula SAE car and manufactured the body harness with Rapid Harness.']},
  {id:'ta',short:'RAS 101 TA',name:'RAS 101 Learning Assistant',when:'ASU, Aug 2026 - now',tags:['Dobot','teaching'],pts:['Guide students through Dobot programming, manipulation, and intro robotics labs; troubleshoot hardware and software.']}
 ];
+// Canvas and state.
+// cv/ctx: the drawing surface. W,H: canvas size in CSS px. CS: cell size in px. cols,rows: grid size. grid[row][col]: 0 = free, 1 = wall.
+// nodes: project positions. robot: grid cell (x,y) plus pixel position (px,py). path: remaining cells to visit. target: node being driven to.
+// algo: 'astar' or 'dijkstra'. dpr: device pixel ratio, capped at 2 for performance. trail: recent cells the robot visited.
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 let W,H,CS,cols,rows,grid,nodes=[],robot,path=[],target=null,algo='astar',dpr=Math.min(devicePixelRatio||1,2),trail=[];
+// init(): (re)builds the grid for the current screen size. Called on load and on window resize (which clears walls).
+// Sets cell size (smaller on phones), makes an empty grid, places project nodes at fractional positions (L) of the grid, and puts the robot in the bottom-left corner.
+// L has one layout for narrow screens (<700px) and one for wide screens; each pair is [fraction of width, fraction of height].
 function init(keep){
   W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
   CS=W<700?22:30;cols=Math.floor(W/CS);rows=Math.floor(H/CS);
@@ -124,7 +161,12 @@ function init(keep){
   nodes=PROJECTS.map((p,i)=>({...p,x:Math.round(cols*L[i][0]),y:Math.round(rows*L[i][1])}));
   robot={x:1,y:rows-2,px:CS*1.5,py:CS*(rows-1.5)};path=[];trail=[];
 }
+// nb(x,y): returns the walkable 4-direction neighbours (no diagonals) of a cell, staying inside the grid and avoiding walls.
 function nb(x,y){return[[1,0],[-1,0],[0,1],[0,-1]].map(d=>[x+d[0],y+d[1]]).filter(([a,b])=>a>=0&&b>=0&&a<cols&&b<rows&&!grid[b][a])}
+// find(): shortest path from (sx,sy) to (tx,ty) on the grid; returns a list of [x,y] cells (start excluded) or null if blocked.
+// Every step costs 1. With algo 'astar' the heuristic h is Manhattan distance to the goal; with 'dijkstra' h is 0, so it explores evenly in all directions.
+// g = best known cost to each cell, from = back-pointers used to rebuild the path, open = frontier sorted by cost + heuristic, seen = cells already expanded.
+// The frontier is re-sorted each loop, which is simple and fast enough for a grid this small.
 function find(sx,sy,tx,ty){
   const key=(x,y)=>y*cols+x,h=(x,y)=>algo==='astar'?Math.abs(x-tx)+Math.abs(y-ty):0;
   const g=new Map([[key(sx,sy),0]]),from=new Map(),open=[[h(sx,sy),sx,sy]],seen=new Set();
@@ -132,32 +174,47 @@ function find(sx,sy,tx,ty){
     if(x===tx&&y===ty){const p=[];let c=k;while(c!==key(sx,sy)){p.unshift([c%cols,Math.floor(c/cols)]);c=from.get(c)}return p}
     for(const[a,b]of nb(x,y)){const nk=key(a,b),ng=g.get(k)+1;if(!g.has(nk)||ng<g.get(nk)){g.set(nk,ng);from.set(nk,k);open.push([ng+h(a,b),a,b])}}}
   return null}
+// go(n): plan a path to node n and start driving. If no route exists (walls block it), flash the robot red instead.
 function go(n){const p=find(robot.x,robot.y,n.x,n.y);if(!p){flash();return}path=p;target=n}
+// flashT: frames left to show the red 'no path' flash.
 let flashT=0;function flash(){flashT=20}
+// arrive(n): robot reached a node, so fill the project panel (title, date, bullets, optional GitHub link, tags) and show it.
+// Note: pts and link are inserted as HTML, so only put trusted text in PROJECTS.
 function arrive(n){const P=document.getElementById('panel');pt.textContent=n.name;pw.textContent=n.when;
   pl.innerHTML=n.pts.map(t=>'<li>'+t+'</li>').join('')+(n.link?'<li><a href="'+n.link+'" target="_blank" rel="noopener">View on GitHub</a></li>':'');
   pg.innerHTML=n.tags.map(t=>'<span>'+t+'</span>').join('');P.classList.add('on')}
+// Panel element references (declared after arrive() but before any click can happen).
 const pt=document.getElementById('pt'),pw=document.getElementById('pw'),pl=document.getElementById('pl'),pg=document.getElementById('pg');
 document.getElementById('x').onclick=()=>document.getElementById('panel').classList.remove('on');
+// Wall drawing. 'mode' is decided on pointer down: if the first cell is a wall we erase (0), otherwise we draw (1), so one drag does one thing.
 let drawing=false,mode=1;
+// cell(e): convert a mouse or touch event to grid coordinates [col,row].
 function cell(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return[Math.floor((t.clientX-r.left)/CS),Math.floor((t.clientY-r.top)/CS)]}
+// paint(e): set the cell under the pointer to the current mode. Skips project nodes and the robot cell. If the robot is mid-trip, re-plans so the route updates live as walls change.
 function paint(e){const[x,y]=cell(e);if(x<0||y<0||x>=cols||y>=rows)return;if(nodes.some(n=>n.x===x&&n.y===y)||(x===robot.x&&y===robot.y))return;
   if(grid[y][x]!==mode){grid[y][x]=mode;if(target){const p=find(robot.x,robot.y,target.x,target.y);if(p)path=p}}}
+// Pointer input. Pressing within one cell of a node sends the robot there; anywhere else starts drawing walls. Pointer capture keeps the drag working if the cursor leaves the canvas.
 cv.addEventListener('pointerdown',e=>{const[x,y]=cell(e);const n=nodes.find(n=>Math.abs(n.x-x)<=1&&Math.abs(n.y-y)<=1);
   if(n){go(n);return}drawing=true;mode=grid[y]&&grid[y][x]?0:1;paint(e);cv.setPointerCapture(e.pointerId)});
 cv.addEventListener('pointermove',e=>{if(drawing)paint(e)});
 cv.addEventListener('pointerup',()=>drawing=false);
+// Buttons and keyboard.
+// reset: clear all walls and stop the robot.  rand: scatter walls (~20% of cells) but keep clear zones around nodes and the robot start.  algo: toggle A* / Dijkstra.  Key 'r': same as reset.
 document.getElementById('reset').onclick=()=>{grid.forEach(r=>r.fill(0));path=[];target=null};
 document.getElementById('rand').onclick=()=>{for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){grid[y][x]=Math.random()<.2&&!nodes.some(n=>Math.abs(n.x-x)<2&&Math.abs(n.y-y)<2)&&!(x<2&&y>rows-3)?1:0}path=[];target=null};
 document.getElementById('algo').onclick=e=>{algo=algo==='astar'?'dijkstra':'astar';e.target.textContent='algorithm: '+(algo==='astar'?'A*':'Dijkstra')};
 addEventListener('keydown',e=>{if(e.key==='r')document.getElementById('reset').click()});
+// Rebuild the grid when the window size changes.
 addEventListener('resize',()=>init());
+// Animation loop (requestAnimationFrame). dt is the time since the last frame, capped at 50ms so a background tab does not cause a huge jump.
+// Each frame the robot moves toward the next path cell at a speed proportional to dt (sp), snapping to the cell when close, keeping a trail of the last 40 cells, and calling arrive() at the end.
 let last=0;
 function frame(t){requestAnimationFrame(frame);const dt=Math.min(t-last,50);last=t;
   if(path.length){const[nx,ny]=path[0];const tx=(nx+.5)*CS,ty=(ny+.5)*CS;const dx=tx-robot.px,dy=ty-robot.py,d=Math.hypot(dx,dy),sp=dt*.28;
     if(d<=sp){robot.px=tx;robot.py=ty;robot.x=nx;robot.y=ny;path.shift();trail.push([nx,ny]);if(trail.length>40)trail.shift();if(!path.length&&target){arrive(target);target=null}}
     else{robot.px+=dx/d*sp;robot.py+=dy/d*sp}}
   draw(t)}
+// draw(t): paints one frame, in order: grid lines, walls, robot trail, planned path dots, project nodes (pulsing glow and label), then the robot. t is the animation time in ms, used for the pulse.
 function draw(t){ctx.clearRect(0,0,W,H);
   ctx.strokeStyle='#162030';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=cols;x++){ctx.moveTo(x*CS,0);ctx.lineTo(x*CS,rows*CS)}for(let y=0;y<=rows;y++){ctx.moveTo(0,y*CS);ctx.lineTo(cols*CS,y*CS)}ctx.stroke();
   ctx.fillStyle='#2a3a52';for(let y=0;y<rows;y++)for(let x=0;x<cols;x++)if(grid[y][x])ctx.fillRect(x*CS+1,y*CS+1,CS-2,CS-2);
@@ -171,7 +228,9 @@ function draw(t){ctx.clearRect(0,0,W,H);
   const r=CS*.34;ctx.save();ctx.translate(robot.px,robot.py);ctx.fillStyle=flashT>0?'#ff5f5f':'#38d6a8';ctx.fillRect(-r,-r,r*2,r*2);ctx.fillStyle='#0b0f14';ctx.fillRect(-r*.6,-r*.4,r*.4,r*.4);ctx.fillRect(r*.2,-r*.4,r*.4,r*.4);ctx.restore();
   if(flashT>0)flashT--}
 
+// RES: resume text for the search box, as [section heading, line] pairs. Keep it in sync with the PDF when the resume changes.
 const RES=[["", "kaushik.gunasekaren@gmail.com • linkedin.com/in/kaushik-gunasekaren"], ["Personal Summary", "Driven undergraduate at Arizona State University pursuing a Bachelor’s degree in Robotics and Autonomous Systems, with hands-on experience in robotics, automation, engineering design, and research. Experienced in designing robotic systems, developing prototypes, troubleshooting hardware and software, and taking projects from concept through implementation. Seeking a Summer 2027 engineering internship to contribute to challenging projects, gain industry experience, and grow as an engineer."], ["Education", "Arizona State University - Polytechnic Campus, Mesa, AZ"], ["Education", "B.S., Robotics and Autonomous Systems | Expected May 2028 | GPA: 3.8/4.0"], ["Technical Skills", "CAD/Design: Fusion 360, SolidWorks, Onshape, 3D printing software"], ["Technical Skills", "Programming & Systems: Python, MATLAB, Embedded Systems (Raspberry Pi, ESP32, Arduino), Linux (Ubuntu & Arch), ROS2, C++, MuJoCo, Isaac Sim"], ["Technical Skills", "Professional: Technical documentation, hardware integration, client/stakeholder communication, cross-functional collaboration"], ["Project & Leadership Experience", "MIT Auto-ID Lab — Research Assistant | Jul 2026 – Present"], ["Project & Leadership Experience", "Design and prototype low-cost, projectile-deployed environmental sensors for measuring temperature, moisture, and canopy microclimate conditions in remote forests."], ["Project & Leadership Experience", "Contribute to the development of a drone-based deployment platform and low-impact attachment mechanism for sensor placement in hard-to-reach terrain."], ["Project & Leadership Experience", "LANL x ASU Devils Invent Hackathon — 1st Place, ASU | Mar 2026"], ["Project & Leadership Experience", "Designed and built a functional prototype within 48 hours, presenting the final system and technical results to Los Alamos National Laboratory judges."], ["Project & Leadership Experience", "Engineered an automated system to safely scrape and collect fired Americium Dioxide from a crucible, reducing operator exposure and eliminating the need for skilled manual handling."], ["Project & Leadership Experience", "AMASS Lab — Research Assistant, ASU | Jan 2025 – Dec 2025"], ["Project & Leadership Experience", "Designed and built an autonomous blimp airframe for the “Defend the Republic” national competition, integrating structural, propulsion, and control systems."], ["Project & Leadership Experience", "Programmed a Raspberry Pi in Python to control propulsion, applying embedded systems and control concepts to a functional autonomous prototype."], ["Project & Leadership Experience", "Sun Devil Motorsports — Team Member, ASU | Sep 2024 – Present"], ["Project & Leadership Experience", "Designed a cooling system for a Formula SAE vehicle and manufactured the vehicle’s body harness using Rapid Harness."], ["Project & Leadership Experience", "ARMS Club — Vice President, ASU | Aug 2026 – Present"], ["Project & Leadership Experience", "Advanced Robotics and Manufacturing Systems"], ["Project & Leadership Experience", "Help lead a student-run engineering consultancy delivering solutions for corporate clients."], ["Project & Leadership Experience", "Oversee project execution and reinvest contract revenue into member-led R&D projects"], ["Project & Leadership Experience", "Created Digital Twins of Unitree Go2 and G1 using MuJoCo and Isaac Sim"], ["Work Experience", "Undergraduate Learning Assistant, RAS 101 — ASU | Aug 2026 – Present"], ["Work Experience", "Guide students through Dobot programming, manipulation, and introductory robotics labs."], ["Work Experience", "Troubleshoot hardware and software issues while reinforcing robotics and mechatronics fundamentals."]];
+// Resume search. esc() escapes HTML in resume text before it is shown; search() requires every typed word to appear in a line (case-insensitive) and highlights matches with <mark>. Regex special characters in the query are escaped.
 const rq=document.getElementById('q'),rr=document.getElementById('rr'),rc=document.getElementById('rc');
 const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function search(){const v=rq.value.trim().toLowerCase();if(!v){rc.textContent='Type a keyword to search the resume.';rr.innerHTML='';return}
@@ -180,6 +239,7 @@ function search(){const v=rq.value.trim().toLowerCase();if(!v){rc.textContent='T
   const re=new RegExp('('+terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
   rr.innerHTML=hits.map(([s,l])=>'<div class="hit"><small>'+esc(s)+'</small>'+esc(l).replace(re,'<mark>$1</mark>')+'</div>').join('')}
 rq.addEventListener('input',search);search();
+// Startup: build the grid and start the animation loop.
 init();requestAnimationFrame(frame);
 </script>
 </body>
