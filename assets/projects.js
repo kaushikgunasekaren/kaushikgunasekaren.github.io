@@ -23,7 +23,7 @@ window.PORTFOLIO_PROJECTS=[
     ],
     "pts": [
       "Design and prototype low-cost, projectile-deployed environmental sensors for temperature, moisture, and canopy microclimate in remote forests.",
-      "Contribute to a drone-based deployment platform and low-impact attachment mechanism for hard-to-reach terrain."
+      "Own five deliverables for a drone-based forest health monitoring system: deployment platform, low-impact tag attachment mechanism, RF data-retrieval subsystem, deployment-planning software, and projectile-deployed sensors."
     ]
   },
   {
@@ -117,6 +117,21 @@ window.PORTFOLIO_PROJECTS=[
     "pts": [
       "Help lead a student-run engineering consultancy for corporate clients; contract revenue funds member-led R&D.",
       "Created digital twins of the Unitree Go2 and G1 in MuJoCo and Isaac Sim."
+    ]
+  },
+  {
+    "id": "spider",
+    "name": "Spider Arm - open-source robotic leg",
+    "short": "Spider Arm",
+    "when": "Team of four, Sep 2026 - now",
+    "tags": [
+      "3D printing",
+      "embedded",
+      "open source"
+    ],
+    "pts": [
+      "Designing, with a team of four, an open-source robotic leg that hobbyists can buy pre-built or customize from open files.",
+      "3D-printed structure with metal fasteners; Python over UART/I2C; Bluetooth phone control."
     ]
   },
   {
