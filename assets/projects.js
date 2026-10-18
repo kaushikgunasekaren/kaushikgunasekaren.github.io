@@ -89,6 +89,22 @@ window.PORTFOLIO_PROJECTS=[
     ]
   },
   {
+    "id": "pu-automations",
+    "short": "PU Automations",
+    "name": "Devils Invent: PU (Plutonium) Automations",
+    "when": "Programmer & Team Lead, ASU, Mar 2025",
+    "tags": [
+      "hackathon",
+      "automation",
+      "Dobot"
+    ],
+    "pts": [
+      "Programmer and Team Lead at Devils Invent: PU (Plutonium) Automations, an ASU hackathon with Los Alamos National Laboratory.",
+      "Automated glovebox workflow for hazardous material reclamation and disposal: Dobot arm pick-and-place with computer vision and ultrasonic sensing."
+    ],
+    "link": "https://github.com/kaushikgunasekaren/NexGenRobotics"
+  },
+  {
     "id": "amass",
     "demo": "blimp",
     "short": "AMASS Blimp",
